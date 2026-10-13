@@ -1,4 +1,6 @@
 from flask import Flask, request, render_template_string
+import csv
+from pathlib import Path
 
 app = Flask(__name__)
 
@@ -75,7 +77,14 @@ def register_client():
     age = request.form.get("client_age", "").strip()
     if not name or not age:
         return "Client name and age are required", 400
-    return f"Client registered: {name}, age {age}"
+    file_path = Path("clients.csv")
+    write_header = not file_path.exists() or file_path.stat().st_size == 0
+    with file_path.open("a", newline="", encoding="utf-8") as file:
+        writer = csv.writer(file)
+        if write_header:
+            writer.writerow(["name", "age"])
+        writer.writerow([name, age])
+    return f"Client registered and saved: {name}, age {age}"
 
 @app.route("/")
 def home():
