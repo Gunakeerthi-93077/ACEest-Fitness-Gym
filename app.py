@@ -51,6 +51,14 @@ PAGE = """
         </form>
     </div>
     <div class="card">
+        <h2>Client Registration</h2>
+        <form method="post" action="/client">
+            <input name="client_name" placeholder="Client name" required>
+            <input name="client_age" type="number" min="1" placeholder="Age" required>
+            <button type="submit">Register Client</button>
+        </form>
+    </div>
+    <div class="card">
         <h2>{{ selected }} Plan</h2>
         <h3>Workout</h3>
         <p>{{ plan.workout }}</p>
@@ -60,6 +68,14 @@ PAGE = """
 </body>
 </html>
 """
+
+@app.route("/client", methods=["POST"])
+def register_client():
+    name = request.form.get("client_name", "").strip()
+    age = request.form.get("client_age", "").strip()
+    if not name or not age:
+        return "Client name and age are required", 400
+    return f"Client registered: {name}, age {age}"
 
 @app.route("/")
 def home():
