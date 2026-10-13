@@ -101,3 +101,36 @@ def home():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
+
+@app.route("/progress", methods=["GET", "POST"])
+def progress():
+    if request.method == "POST":
+        client_name = request.form.get("client_name", "").strip()
+        weight = request.form.get("weight", "").strip()
+        if not client_name or not weight:
+            return "Client name and weight are required", 400
+        try:
+            weight_value = float(weight)
+            if weight_value <= 0:
+                raise ValueError
+        except ValueError:
+            return "Enter a valid positive weight", 400
+
+        file_path = Path("progress.csv")
+        write_header = not file_path.exists() or file_path.stat().st_size == 0
+        with file_path.open("a", newline="", encoding="utf-8") as file:
+            writer = csv.writer(file)
+            if write_header:
+                writer.writerow(["client_name", "weight"])
+            writer.writerow([client_name, weight_value])
+        return "Progress saved successfully"
+
+    return """
+    <h1>Fitness Progress Tracking</h1>
+    <form method="post">
+        <input name="client_name" placeholder="Client name" required>
+        <input name="weight" type="number" step="0.1" min="0.1"
+               placeholder="Current weight (kg)" required>
+        <button type="submit">Save Progress</button>
+    </form>
+    """
